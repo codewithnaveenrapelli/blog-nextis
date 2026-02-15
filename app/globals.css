@@ -1,0 +1,51 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.scrollbar-hide::-webkit-scrollbar{
+    display: none;
+}
+
+.scrollbar-hide{
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+/* Improve article readability */
+.prose img {
+  border-radius: 12px;
+}
+
+.prose pre {
+  border-radius: 12px;
+  padding: 16px;
+  overflow-x: auto;
+}
+
+.prose code {
+  font-weight: 500;
+}
+
+.prose h2 {
+  scroll-margin-top: 90px;
+}
+
+.blog-content h1,
+.blog-content h2,
+.blog-content h3 {
+  scroll-margin-top: 120px;
+}
+
+/* smooth progress feel */
+html {
+  scroll-behavior: smooth;
+}
+
+/* subtle gradient */
+.progress-bar {
+  background: linear-gradient(90deg, #000, #444, #000);
+}
