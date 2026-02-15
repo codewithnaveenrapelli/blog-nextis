@@ -3,8 +3,8 @@ import SubsTableItem from '@/Components/AdminComponents/SubsTableItem'
 import axios from 'axios';
 import React, { useEffect, useState } from 'react'
 import { toast } from 'react-toastify';
-
-const page = () => {
+export const dynamic = "force-dynamic";
+export default function SubscriptionsPage() {
 
   const [emails,setEmails] = useState([]);
 
@@ -61,5 +61,3 @@ const page = () => {
     </div>
   )
 }
-
-export default page

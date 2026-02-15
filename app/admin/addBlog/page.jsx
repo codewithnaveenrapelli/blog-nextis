@@ -4,8 +4,8 @@ import axios from 'axios'
 import Image from 'next/image'
 import React, { useState } from 'react'
 import { toast } from 'react-toastify'
-
-const page = () => {
+export const dynamic = "force-dynamic";
+export default function AddBlogPage() {
 
   const [image, setImage] = useState(false);
   const [data, setData] = useState({
@@ -78,5 +78,3 @@ const page = () => {
     </>
   )
 }
-
-export default page

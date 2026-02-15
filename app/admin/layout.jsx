@@ -2,8 +2,8 @@ import { assets } from "@/Assets/assets";
 import Sidebar from "@/Components/AdminComponents/Sidebar";
 import Image from "next/image";
 import { ToastContainer} from 'react-toastify';
-  import 'react-toastify/dist/ReactToastify.css';
-
+import 'react-toastify/dist/ReactToastify.css';
+export const dynamic = "force-dynamic";
 export default function Layout({ children }) {
     return (
         <>
