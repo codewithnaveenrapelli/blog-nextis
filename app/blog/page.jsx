@@ -1,5 +1,5 @@
 import BlogList from "@/Components/BlogList";
-
+import { getPaginatedBlogs } from "@/lib/data/blogs";
 export const dynamic = "force-dynamic";
 
 export default async function BlogPage({ searchParams }) {
