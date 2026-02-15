@@ -4,7 +4,7 @@ import { NextResponse } from "next/server";
 import { writeFile } from "fs/promises";
 import fs from "fs";
 import sanitizeHtml from "sanitize-html";
-
+export const dynamic = "force-dynamic";
 // 🔗 generate slug from title
 function generateSlug(title) {
   return title

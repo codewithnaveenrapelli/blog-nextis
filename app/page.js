@@ -3,7 +3,7 @@ import FeaturedPost from "@/Components/FeaturedPost";
 import Footer from "@/Components/Footer";
 import Link from "next/link";
 import Newsletter from "@/Components/Newsletter";
-
+export const dynamic = "force-dynamic";
 // server fetch
 async function getBlogs() {
   const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/blog`, {

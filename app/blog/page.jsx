@@ -1,6 +1,6 @@
 import BlogList from "@/Components/BlogList";
 import Footer from "@/Components/Footer";
-
+export const dynamic = "force-dynamic";
 // fetch paginated blogs
 async function getBlogs(page) {
   const res = await fetch(
