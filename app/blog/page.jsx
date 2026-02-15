@@ -1,25 +1,15 @@
 import BlogList from "@/Components/BlogList";
 import Footer from "@/Components/Footer";
-export const dynamic = "force-dynamic";
-// fetch paginated blogs
-async function getBlogs(page) {
-  const res = await fetch(
-    `${process.env.NEXT_PUBLIC_BASE_URL}/api/blog?page=${page}&limit=6`,
-    { cache: "no-store" }
-  );
+import { getPaginatedBlogs } from "@/lib/data/blogs";
 
-  return res.json();
-}
+export const dynamic = "force-dynamic";
 
 export default async function BlogPage({ searchParams }) {
 
-  const page = Number(searchParams.page || 1);
+  const page = Number(searchParams?.page || 1);
 
-  const data = await getBlogs(page);
-
-  const blogs = data.blogs || [];
-  const totalPages = data.totalPages || 1;
-  const currentPage = data.currentPage || 1;
+  // 🔥 DIRECT DB CALL (no fetch)
+  const { blogs, totalPages, currentPage } = await getPaginatedBlogs(page, 6);
 
   return (
     <>
@@ -39,6 +29,8 @@ export default async function BlogPage({ searchParams }) {
           totalPages={totalPages}
         />
       </section>
+
+      <Footer />
     </>
   );
 }

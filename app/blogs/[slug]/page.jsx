@@ -2,31 +2,18 @@ import { assets } from '@/Assets/assets'
 import Footer from '@/Components/Footer'
 import Image from 'next/image'
 import dynamicImport from "next/dynamic";
+import { getBlogBySlug } from "@/lib/data/blogs";
 
 export const dynamic = "force-dynamic";
-
 
 const ReadingProgress = dynamicImport(() => import("@/Components/ReadingProgress"), { ssr: false });
 const TableOfContents = dynamicImport(() => import("@/Components/TableOfContents"), { ssr: false });
 
+export default async function Page({ params }) {
 
-// fetch blog
-async function getBlog(slug) {
-  const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/blog?slug=${slug}`, {
-    cache: "no-store",
-  });
+  // 🔥 DIRECT DATABASE CALL
+  const data = await getBlogBySlug(params.slug);
 
-  if (!res.ok) return null;
-
-  const data = await res.json();
-  return data || null;
-}
-
-export default async function page({ params }) {
-
-  const data = await getBlog(params.slug);
-
-  // 🚨 IMPORTANT: if blog not found
   if (!data) {
     return (
       <div className="py-40 text-center">
@@ -87,12 +74,12 @@ export default async function page({ params }) {
               )
             }}
           />
-
         </article>
 
         <TableOfContents />
       </div>
 
+      <Footer />
     </>
   );
 }
