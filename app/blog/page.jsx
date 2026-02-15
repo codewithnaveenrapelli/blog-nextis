@@ -30,7 +30,6 @@ export default async function BlogPage({ searchParams }) {
         />
       </section>
 
-      <Footer />
     </>
   );
 }

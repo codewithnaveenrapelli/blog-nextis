@@ -1,11 +1,18 @@
 import BlogList from "@/Components/BlogList";
 import Footer from "@/Components/Footer";
+import { headers } from "next/headers";
 
-// fetch blogs
+// fetch blogs (server safe)
 async function getBlogs() {
-  fetch(`${process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : ""}/api/blog`, {
-  cache: "no-store"
-})
+
+  const host = headers().get("host");
+  const protocol = process.env.NODE_ENV === "development" ? "http" : "https";
+
+  const res = await fetch(`${protocol}://${host}/api/blog`, {
+    cache: "no-store",
+  });
+
+  if (!res.ok) return [];
 
   const data = await res.json();
   return data.blogs || [];
@@ -35,8 +42,6 @@ export default async function CategoryPage({ params }) {
       <section className="bg-gray-50 py-16">
         <BlogList blogs={filtered} />
       </section>
-
-      <Footer />
     </>
   );
 }

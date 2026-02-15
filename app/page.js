@@ -3,12 +3,21 @@ import FeaturedPost from "@/Components/FeaturedPost";
 import Footer from "@/Components/Footer";
 import Link from "next/link";
 import Newsletter from "@/Components/Newsletter";
+import { headers } from "next/headers";
+
 export const dynamic = "force-dynamic";
-// server fetch
+
+// server fetch (SAFE FOR LOCAL + VERCEL + DOMAIN)
 async function getBlogs() {
- fetch(`${process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : ""}/api/blog`, {
-  cache: "no-store"
-})
+
+  const host = headers().get("host");
+  const protocol = process.env.NODE_ENV === "development" ? "http" : "https";
+
+  const res = await fetch(`${protocol}://${host}/api/blog`, {
+    cache: "no-store",
+  });
+
+  if (!res.ok) return [];
 
   const data = await res.json();
   return data.blogs || [];

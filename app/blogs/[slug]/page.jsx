@@ -1,4 +1,3 @@
-import { assets } from '@/Assets/assets'
 import Footer from '@/Components/Footer'
 import Image from 'next/image'
 import dynamicImport from "next/dynamic";
@@ -11,7 +10,11 @@ const TableOfContents = dynamicImport(() => import("@/Components/TableOfContents
 
 export default async function Page({ params }) {
 
-  // 🔥 DIRECT DATABASE CALL
+  // 🛡️ protect against undefined params
+  if (!params?.slug) {
+    return null;
+  }
+
   const data = await getBlogBySlug(params.slug);
 
   if (!data) {
@@ -23,10 +26,28 @@ export default async function Page({ params }) {
     );
   }
 
+  // 🛡️ safe description
+  const description = data.description || "";
+
   // reading time calculation SAFE
-  const text = data.description?.replace(/<[^>]*>/g, '') || "";
+  const text = description.replace(/<[^>]*>/g, '');
   const words = text.split(/\s+/).filter(Boolean).length;
   const readingTime = Math.max(1, Math.ceil(words / 200));
+
+  // 🛡️ safe heading ids
+  const formattedHTML = description.replace(
+    /<h([1-6])>(.*?)<\/h\1>/g,
+    (match, level, text) => {
+      const id = text
+        .toLowerCase()
+        .replace(/<[^>]*>/g, "")
+        .replace(/[^a-z0-9\s]/g, "")
+        .trim()
+        .replace(/\s+/g, "-");
+
+      return `<h${level} id="${id}">${text}</h${level}>`;
+    }
+  );
 
   return (
     <>
@@ -41,7 +62,13 @@ export default async function Page({ params }) {
         </h1>
 
         <div className='flex items-center justify-center gap-3 mt-6 text-gray-600'>
-          <Image className='rounded-full' src={data.authorImg} width={40} height={40} alt='' />
+          <Image
+            className='rounded-full'
+            src={data.authorImg || "/author_img.png"}
+            width={40}
+            height={40}
+            alt=''
+          />
           <span>{data.author}</span>
           <span>•</span>
           <span>{readingTime} min read</span>
@@ -50,7 +77,13 @@ export default async function Page({ params }) {
 
       {/* HERO IMAGE */}
       <div className='max-w-4xl mx-auto px-5 mt-10'>
-        <Image className='rounded-xl w-full h-auto' src={data.image} width={900} height={500} alt='' />
+        <Image
+          className='rounded-xl w-full h-auto'
+          src={data.image || "/placeholder.jpg"}
+          width={900}
+          height={500}
+          alt=''
+        />
       </div>
 
       {/* CONTENT */}
@@ -58,28 +91,12 @@ export default async function Page({ params }) {
         <article className='flex-1 min-w-0'>
           <div
             className='prose lg:prose-lg max-w-none blog-content'
-            dangerouslySetInnerHTML={{
-              __html: data.description.replace(
-                /<h([1-6])>(.*?)<\/h\1>/g,
-                (match, level, text) => {
-                  const id = text
-                    .toLowerCase()
-                    .replace(/<[^>]*>/g, "")
-                    .replace(/[^a-z0-9\s]/g, "")
-                    .trim()
-                    .replace(/\s+/g, "-");
-
-                  return `<h${level} id="${id}">${text}</h${level}>`;
-                }
-              )
-            }}
+            dangerouslySetInnerHTML={{ __html: formattedHTML }}
           />
         </article>
 
         <TableOfContents />
       </div>
-
-      <Footer />
     </>
   );
 }
