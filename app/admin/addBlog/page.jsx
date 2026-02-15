@@ -1,9 +1,8 @@
 "use client";
 
-import { assets } from "@/Assets/assets";
 import axios from "axios";
 import Image from "next/image";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
 
@@ -12,6 +11,7 @@ export default function AddBlogPage() {
   const router = useRouter();
 
   const [image, setImage] = useState(null);
+  const [preview, setPreview] = useState(null);
   const [loading, setLoading] = useState(false);
 
   const [data, setData] = useState({
@@ -22,28 +22,60 @@ export default function AddBlogPage() {
     authorImg: "/author_img.png"
   });
 
-  // handle inputs
+  /* ---------------- IMAGE PREVIEW (no memory leak) ---------------- */
+  useEffect(() => {
+    if (!image) {
+      setPreview(null);
+      return;
+    }
+
+    const objectUrl = URL.createObjectURL(image);
+    setPreview(objectUrl);
+
+    return () => URL.revokeObjectURL(objectUrl);
+  }, [image]);
+
+  /* ---------------- INPUT HANDLER ---------------- */
   const onChangeHandler = (event) => {
     const { name, value } = event.target;
     setData(prev => ({ ...prev, [name]: value }));
   };
 
-  // submit
+  /* ---------------- VALIDATION ---------------- */
+  const validateForm = () => {
+
+    if (!image) {
+      toast.error("Thumbnail is required");
+      return false;
+    }
+
+    if (data.title.trim().length < 10) {
+      toast.error("Title should be at least 10 characters");
+      return false;
+    }
+
+    const plainText = data.description.replace(/<[^>]*>/g, "").trim();
+    if (plainText.length < 50) {
+      toast.error("Content too small (minimum 50 characters)");
+      return false;
+    }
+
+    return true;
+  };
+
+  /* ---------------- SUBMIT ---------------- */
   const onSubmitHandler = async (e) => {
     e.preventDefault();
 
-    if (!image) {
-      toast.error("Please upload thumbnail");
-      return;
-    }
+    if (!validateForm()) return;
 
     try {
       setLoading(true);
 
       const formData = new FormData();
-      formData.append("title", data.title);
+      formData.append("title", data.title.trim());
       formData.append("description", data.description);
-      formData.append("category", data.category);
+      formData.append("category", data.category.trim().toLowerCase()); // normalize category
       formData.append("author", data.author);
       formData.append("authorImg", data.authorImg);
       formData.append("image", image);
@@ -53,28 +85,21 @@ export default function AddBlogPage() {
       if (response.data.success) {
         toast.success("Blog Published 🚀");
 
-        // redirect to blog page using slug
+        // redirect using slug
         router.push(`/blogs/${response.data.slug}`);
-
-        // reset
-        setImage(null);
-        setData({
-          title: "",
-          description: "",
-          category: "AEM",
-          author: "naveen rapelly",
-          authorImg: "/author_img.png"
-        });
+      } else {
+        toast.error(response.data.msg || "Publish failed");
       }
 
     } catch (err) {
       console.error(err);
-      toast.error("Upload failed");
+      toast.error(err?.response?.data?.msg || "Server error");
     } finally {
       setLoading(false);
     }
   };
 
+  /* ---------------- UI ---------------- */
   return (
     <form onSubmit={onSubmitHandler} className="pt-5 px-5 sm:pt-12 sm:pl-16 max-w-2xl">
 
@@ -83,7 +108,7 @@ export default function AddBlogPage() {
       <label htmlFor="image" className="cursor-pointer block w-fit">
         <Image
           className="mt-4 rounded-md border"
-          src={image ? URL.createObjectURL(image) : assets.upload_area}
+          src={preview || "/upload_area.png"} 
           width={220}
           height={120}
           alt="thumbnail"
@@ -96,7 +121,6 @@ export default function AddBlogPage() {
         id="image"
         hidden
         accept="image/*"
-        required
       />
 
       {/* TITLE */}
@@ -107,7 +131,7 @@ export default function AddBlogPage() {
         value={data.title}
         className="w-full mt-3 px-4 py-3 border rounded-md"
         type="text"
-        placeholder="Type here"
+        placeholder="Example: Understanding Sling Models in AEM"
         required
       />
 
@@ -118,8 +142,8 @@ export default function AddBlogPage() {
         onChange={onChangeHandler}
         value={data.description}
         className="w-full mt-3 px-4 py-3 border rounded-md"
-        placeholder="Write content here (HTML supported)"
-        rows={10}
+        placeholder="Write blog content (HTML supported)"
+        rows={12}
         required
       />
 

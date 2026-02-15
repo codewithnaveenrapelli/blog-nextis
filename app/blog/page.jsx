@@ -1,6 +1,4 @@
 import BlogList from "@/Components/BlogList";
-import Footer from "@/Components/Footer";
-import { getPaginatedBlogs } from "@/lib/data/blogs";
 
 export const dynamic = "force-dynamic";
 
