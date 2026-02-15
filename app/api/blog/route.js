@@ -72,9 +72,7 @@ export async function POST(request) {
   await ConnectDB();
 
   const formData = await request.formData();
-  const timestamp = Date.now();
 
-  // -------- image handling --------
   const image = formData.get("image");
 
   if (!image || !image.name) {
@@ -84,16 +82,24 @@ export async function POST(request) {
     );
   }
 
-  const imageByteData = await image.arrayBuffer();
-  const buffer = Buffer.from(imageByteData);
+  // Convert image to buffer
+  const imageBuffer = Buffer.from(await image.arrayBuffer());
 
-  const fileName = `${timestamp}_${image.name}`;
-  const path = `./public/${fileName}`;
+  // Upload to cloudinary
+  const uploadResult = await new Promise((resolve, reject) => {
+    const uploadStream = cloudinary.uploader.upload_stream(
+      { folder: "blogs" },
+      (error, result) => {
+        if (error) reject(error);
+        else resolve(result);
+      }
+    );
+    streamifier.createReadStream(imageBuffer).pipe(uploadStream);
+  });
 
-  await writeFile(path, buffer);
-  const imgUrl = `/${fileName}`;
+  const imgUrl = uploadResult.secure_url;
 
-  // -------- sanitize content --------
+  // sanitize HTML
   const cleanDescription = sanitizeHtml(formData.get("description"), {
     allowedTags: [
       "p","b","i","em","strong","a","ul","ol","li",
@@ -107,7 +113,6 @@ export async function POST(request) {
     allowedSchemes: ["http","https","mailto"]
   });
 
-  // ⭐ generate unique slug
   const slug = await createUniqueSlug(formData.get("title"));
 
   const blogData = {
@@ -129,6 +134,7 @@ export async function POST(request) {
   });
 }
 
+
 // ================= DELETE =================
 export async function DELETE(request) {
   await ConnectDB();
@@ -138,11 +144,6 @@ export async function DELETE(request) {
 
   if (!blog) {
     return NextResponse.json({ error: "Blog not found" }, { status: 404 });
-  }
-
-  // remove image
-  if (blog?.image) {
-    fs.unlink(`./public${blog.image}`, () => {});
   }
 
   await BlogModel.findByIdAndDelete(id);
