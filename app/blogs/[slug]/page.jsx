@@ -1,10 +1,13 @@
 import { assets } from '@/Assets/assets'
 import Footer from '@/Components/Footer'
 import Image from 'next/image'
-import dynamic from "next/dynamic";
+import dynamicImport from "next/dynamic";
+
 export const dynamic = "force-dynamic";
-const ReadingProgress = dynamic(() => import("@/Components/ReadingProgress"), { ssr: false });
-const TableOfContents = dynamic(() => import("@/Components/TableOfContents"), { ssr: false });
+
+
+const ReadingProgress = dynamicImport(() => import("@/Components/ReadingProgress"), { ssr: false });
+const TableOfContents = dynamicImport(() => import("@/Components/TableOfContents"), { ssr: false });
 
 
 // fetch blog
